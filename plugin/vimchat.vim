@@ -1097,13 +1097,18 @@ You can type \on to reconnect.
 """ % (curJid))
                 continue
             accountPresenceInfo = account.jabberGetPresence()
-            if accountPresenceInfo[0] != None:
-                status = str(accountPresenceInfo[1])
-                if status == "None":
-                    status = ''
-                accountText = u"{{{ [+] %s\n\t%s: %s\n"%(curJid,str(accountPresenceInfo[0]),status)
-            else:
-                accountText = u"{{{ [+] %s\n"%(curJid)
+            accountPresenceInfo = account.jabberGetPresence()
+            presenceString=""
+            if accountPresenceInfo[0] != None and accountPresenceInfo[0] != "None" and len(accountPresenceInfo[0])>0:
+                presenceString = str(accountPresenceInfo[0])+":"
+                if accountPresenceInfo[1] != None and len(accountPresenceInfo[1])>0:
+                    presenceString += " "+str(accountPresenceInfo[1])
+            elif accountPresenceInfo[1] != None and accountPresenceInfo[1] != "None" and len(accountPresenceInfo[1])>0:
+                # in normal cases it only could be 'on' (checking also the priority would be
+                # the final test)
+                presenceString = "on: "+str(accountPresenceInfo[1])
+            if presenceString:
+                presenceString = "\t"+presenceString+"\n"
             rF.write(accountText)
 
             roster = account._roster
