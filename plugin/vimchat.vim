@@ -535,7 +535,7 @@ class VimChatScope:
         def jabberSubscriptionRequest(self, con, msg):
             jid = str(msg.getFrom())
             VimChat.addAuthorizationRequest(self._jids,jid)
-        #}}
+        #}}}
         #{{{ jabberSubscribe
         def jabberSubscribe(self,jid):
             m = xmpp.protocol.Presence(to=jid, typ="subscribed")
