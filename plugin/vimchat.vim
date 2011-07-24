@@ -108,6 +108,7 @@ class VimChatScope:
     oldShowList = {}
     sessionStatusRestore = 0
     isRefreshBuddyList = 1
+    pendingAuthorizationRequests = {}
 
     #{{{ init
     def init(self):
@@ -378,8 +379,8 @@ class VimChatScope:
         #{{{ run
         def run(self):
             self.jabber.RegisterHandler('message',self.jabberMessageReceive)
+            self.jabber.RegisterHandler("presence", self.jabberSubscriptionRequest, typ = "subscribe")
             self.jabber.RegisterHandler('presence',self.jabberPresenceReceive)
-            self.jabberPresenceUpdate()
 
             #Socket stuff
             RECV_BUF = 4096
@@ -537,7 +538,21 @@ class VimChatScope:
             except:
                 pass
         #}}}
-
+        #{{{ jabberSubscriptionRequest
+        def jabberSubscriptionRequest(self, con, msg):
+            jid = str(msg.getFrom())
+            VimChat.addAuthorizationRequest(self._jids,jid)
+        #}}
+        #{{{ jabberSubscribe
+        def jabberSubscribe(self,jid):
+            m = xmpp.protocol.Presence(to=jid, typ="subscribed")
+            self.jabber.send(m)
+        #}}}
+        #{{{ jabberUnSubscribe
+        def jabberUnSubscribe(self,jid):
+            m = xmpp.protocol.Presence(to=jid, typ="unsubscribed")
+            self.jabber.send(m)
+        #}}}
         #To Jabber Functions
         #{{{ jabberOnSendMessage
         def jabberOnSendMessage(self, tojid, msg):
@@ -1085,6 +1100,55 @@ class VimChatScope:
 
         return False
     #}}}
+    #{{{ addAuthorizationRequest
+    def addAuthorizationRequest(self,account,jid):
+        if jid == None or len(jid) < 1:
+            return
+        if not self.pendingAuthorizationRequests.get(jid):
+            self.pendingAuthorizationRequests[jid] = []
+        self.pendingAuthorizationRequests.get(jid).append(account)
+    #}}}
+    #{{{ processAuthorizationRequest
+    def processAuthorizationRequest(self):
+        if len(self.pendingAuthorizationRequests) < 1:
+            return
+        jid = str(self.pendingAuthorizationRequests.iterkeys().next())
+        while jid and len(self.pendingAuthorizationRequests[jid]) == 0:
+            jid = str(self.pendingAuthorizationRequests.iterkeys().next())
+        if not jid:
+            return
+        account = self.pendingAuthorizationRequests[jid].pop()
+        if account == None:
+            return
+        con = self.accounts[account]
+        if con == None:
+            return
+
+        pattern = re.compile(r"""([^@]*@)?(?P<type>\w*)(\.[^\W\d]{2,4})?""")
+        match = pattern.match(account)
+        accountStr = match.group("type")
+        if not accountStr:
+            accountStr = account
+        self.pyNotification("Authorization request", jid+" wants to add you to his/her "+accountStr+" buddy list ", 'dialog-information')
+        input = str(vim.eval('input("Authorize buddy \''+jid+'\' to add you to his/her '+accountStr+' buddy list? [Y/n] ")'))
+        
+        if input != None and input == "Y":
+            con.jabberSubscribe(jid)
+            self.refreshBuddyList()     # shows immediately if the contact is online
+        elif input != None and str.lower(input) == "n":
+            con.jabberUnSubscribe(jid)
+            print "Buddy authorization rejected"
+            vim.command("echo") # clear ex line
+        else:
+            print "Buddy authorization confirmation postponed"
+            vim.command("echo") # clear ex line
+        vim.command("vi")   # exit ex mode, return to last used buffer
+
+        # Cleanup:
+        # if the list now becomes empty we can remove it
+        if len(self.pendingAuthorizationRequests[jid]) == 0:
+            del self.pendingAuthorizationRequests[jid]
+    #}}}
 
     #BUDDY LIST
     #{{{ toggleBuddyList
@@ -1260,6 +1324,11 @@ You can type \on to reconnect.
             rF.write("}}}\n")
 
         rF.close()
+
+        # Check if there are some pending authorization requests
+        # TODO: find a better place to add this "periodic" call
+        # vim inputs() don't work well when started from threads
+        self.processAuthorizationRequest()
     #}}}
 
     #CHAT BUFFERS
