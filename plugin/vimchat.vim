@@ -31,6 +31,7 @@
 "   g:vimchat_showPresenceNotification = notify if buddy changed status default ""
 "   g:vimchat_autoLogin = (0 or 1) default is 0
 "   g:vimchat_statusAutoCompletion = (0 or 1) default is 1
+"   g:vimchat_restoreSessionStatus = (0 or 1) default is 0
 
 python <<EOF
 #{{{ Imports
@@ -103,6 +104,7 @@ class VimChatScope:
     blinktimeout = -1
     timeformat = "[%H:%M]"
     oldShowList = {}
+    sessionStatusRestore = 0
 
     #{{{ init
     def init(self):
@@ -159,6 +161,9 @@ class VimChatScope:
 
         # Timestamp format
         self.timeformat = vim.eval('g:vimchat_timestampformat')
+
+        # Set restore session variable
+        self.sessionStatusRestore = int(vim.eval('g:vimchat_restoreSessionStatus'))
 
         # Signon to accounts listed in .vimrc
         if vim.eval("exists('g:vimchat_accounts')") == '1':
@@ -880,9 +885,21 @@ class VimChatScope:
             try:
                 self.accounts[accountJid].disconnect()
             except: pass
-        self.accounts[accountJid] = self.JabberConnection(
-            self, jid, jabberClient, roster)
+
+        self.accounts[accountJid] = self.JabberConnection(self, jid, jabberClient, roster)
         self.accounts[accountJid].start()
+
+        # Restore the status of the previous session
+        last_status = None
+        last_show = last_state = last_priority = ""
+        if self.sessionStatusRestore==1:
+            last_status = self.getLastStatus(jid)
+            if last_status:
+                [last_show,last_state,last_priority] = last_status.split(',')
+        if last_status:
+            self.accounts[accountJid].jabberPresenceUpdate(last_show,last_state,last_priority)
+        else:
+            self.accounts[accountJid].jabberPresenceUpdate()
         print "Connected with " + jid
         if self.growl_enabled:
             self.growl_notifier.notify ("account status", "VimChat", "Signed into " + jid + " successfully", self.growl_icon)
@@ -902,9 +919,10 @@ class VimChatScope:
     #{{{ signOffAll
     def signOffAll(self):
         accounts = self.accounts
-        if len(accounts) == 0:
+        size = len(accounts)
+        if size == 0:
             return
-        size=len(accounts)
+        vim.command("normal \<ESC>")
         while(size > 0):
             account = accounts.keys()[0]
             self._signOff(account)
@@ -919,6 +937,15 @@ class VimChatScope:
         accounts = self.accounts
         if account in accounts:
             try:
+                # Save the status of this account to the config file
+                if self.sessionStatusRestore==1:
+                    [show,status] = accounts[account].jabberGetPresence()
+                    priority = accounts[account]._presence.getPriority()
+                    if not show: show=''
+                    if not status: status=''
+                    if not priority: priority=''
+                    self.setLastStatus(account,str(show),str(status),str(priority))
+                # disconnect and stop
                 accounts[account].disconnect()
                 accounts[account].stop()
                 del accounts[account]
@@ -1839,7 +1866,9 @@ fu! VimChatCheckVars()
     if !exists('g:vimchat_statusAutoCompletion')
         let g:vimchat_statusAutoCompletion=1
     endif
-
+    if !exists('g:vimchat_restoreSessionStatus')
+        let g:vimchat_restoreSessionStatus=0
+    endif
     return 1
 endfu
 "}}}

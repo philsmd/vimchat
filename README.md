@@ -83,6 +83,7 @@ __Optional ~/.vimrc Variables:__
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
 * let g:vimchat\_autoLogin = (0 or 1), default is 0
 * let g:vimchat\_statusAutoCompletion = (0 or 1), default is 1
+* let g:vimchat\_restoreSessionStatus = (0 or 1), default is 0
 
 # Contributors 
 
