@@ -843,6 +843,9 @@ class VimChatScope:
     def _signOn(self, jid, password):
         if not password:
             password = vim.eval('inputsecret("' + jid + ' password: ")')
+        if password == None or len(password) == 0:
+            print "Login aborted"
+            return
         [jidSmall,user,resource] = self.getJidParts(jid)
         print "Connecting user " + jid + "..."
         if jidSmall in self.accounts:
