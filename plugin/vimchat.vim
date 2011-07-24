@@ -826,6 +826,37 @@ class VimChatScope:
             return dict.__getitem__(self, key)
         #}}}
     #}}}
+    #RESET STATUS FUNCTIONS
+    #{{{ getLastStatus
+    def getLastStatus(self,account=None):
+        if not os.path.exists(self.configFilePath):
+            return # Config file does not exist
+        status=""
+        config = RawConfigParser();
+        config.read(self.configFilePath)
+        if config.has_section('last_status'):
+            for acc in config.options('last_status'):
+                if account == None or account == acc:
+                    status = config.get('last_status', acc)
+                    break
+        return status
+    #}}}
+    #{{{ setLastStatus
+    def setLastStatus(self,account,show="",status="",priority=""):
+        if not os.path.exists(self.configFilePath):
+            return # Config file does not exist
+        if account == None:
+            return
+        status=show+","+status+","+priority
+        config.read(self.configFilePath)
+        config.read(self.configFilePath)
+        if not config.has_section('last_status'):
+            config.add_section('last_status')
+        config.set('last_status', account, str(status))
+        # Does not preserve comments
+        with open(self.configFilePath,'wb') as configfile:
+            config.write(configfile)
+    #}}}
     #CONNECTION FUNCTIONS
     #{{{ signOn
     def signOn(self):
@@ -953,7 +984,7 @@ class VimChatScope:
         else:
             print 'Error: [%s] is an invalid account.' % (account)
             if self.growl_enabled:
-                    self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
+                self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
     #}}}
     #{{{ showStatus
     def showStatus(self):
