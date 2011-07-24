@@ -939,7 +939,15 @@ class VimChatScope:
     #CONNECTION FUNCTIONS
     #{{{ signOn
     def signOn(self):
+        # all available accounts
         accounts = self.getAccountsFromConfig()
+        # Only allow to sign-on to accounts which the user is not connected to
+        if self.accounts:
+            size = len(accounts)
+            for acc,val in accounts.items():
+                for acc2 in self.accounts:
+                    if str(acc2) == str(acc):
+                        del accounts[acc]
         if len(accounts) == 0:
             if self.accounts == 0:
                 print 'No accounts found in the vimchat config %s.' % (self.configFilePath)
@@ -949,6 +957,7 @@ class VimChatScope:
                 return
         account = self.getDesiredAccount(accounts)
         if account:
+            password = accounts[account]
             self._signOn(account, password)
             self.refreshBuddyList()
         else:
