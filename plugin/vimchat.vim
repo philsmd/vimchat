@@ -29,6 +29,7 @@
 "   g:vimchat_buddylistmaxwidth = max width of buddy list window default ''
 "   g:vimchat_timestampformat = format of the message timestamp default "[%H:%M]" 
 "   g:vimchat_showPresenceNotification = notify if buddy changed status default ""
+"   g:vimchat_autoRefreshBuddyList = (0 or 1) default is 1
 
 python <<EOF
 #{{{ Imports
@@ -103,6 +104,7 @@ class VimChatScope:
     blinktimeout = -1
     timeformat = "[%H:%M]"
     oldShowList = {}
+    isRefreshBuddyList = 1
 
     #{{{ init
     def init(self):
@@ -154,6 +156,9 @@ class VimChatScope:
 
         # Timestamp format
         self.timeformat = vim.eval('g:vimchat_timestampformat')
+
+        # Set refresh buddy list variable
+        self.isRefreshBuddyList = int(vim.eval("g:vimchat_autoRefreshBuddyList"))
 
         # Signon to accounts listed in .vimrc
         if vim.eval("exists('g:vimchat_accounts')") == '1':
@@ -581,6 +586,9 @@ class VimChatScope:
                 status=status)
             self._presence = m
             self.jabber.send(m)
+            # update Buddy list if enabled
+            if VimChat.isRefreshBuddyList==1:
+                VimChat.refreshBuddyList()
         #}}}
         #{{{ jabberGetPresence
         def jabberGetPresence(self):
@@ -836,6 +844,7 @@ class VimChatScope:
         if account in accounts:
             password = accounts[account]
             self._signOn(account, password)
+            self.refreshBuddyList()
         else:
             print 'Error: [%s] is an invalid account.' % (account)
     #}}}
@@ -967,6 +976,13 @@ class VimChatScope:
                 return buf
         return None
     #}}}
+    #{{{ isBuddyListLoaded
+    def isBuddyListLoaded(self):
+        if self.buddyListBuffer:
+            if str(self.buddyListBuffer.number) in str(vim.eval('tabpagebuflist()')):
+                return True
+        return False
+    #}}}
     #{{{ isGroupChat
     def isGroupChat(self):
         try:
@@ -990,8 +1006,6 @@ class VimChatScope:
             return 0
 
         if self.buddyListBuffer:
-            bufferList = vim.eval('tabpagebuflist()')
-            if str(self.buddyListBuffer.number) in bufferList:
                 vim.command('sbuffer ' + str(self.buddyListBuffer.number))
                 vim.command('hide')
                 return
@@ -1008,7 +1022,12 @@ class VimChatScope:
             vim.command("silent e!")
             vim.command("setlocal noswapfile")
             vim.command("setlocal nomodifiable")
-            vim.command("setlocal buftype=nowrite")
+            if self.isRefreshBuddyList==1:
+                vim.command("setlocal autoread")
+            else:
+                # only set to nowrite if buddy list will not be refreshed automatically
+                # otherwise some autocommands would not be triggered
+                vim.command("setlocal buftype=nowrite")
         except Exception, e:
             print e
             vim.command("new " + self.rosterFile)
@@ -1023,6 +1042,7 @@ class VimChatScope:
         nnoremap <buffer> <silent> q :py VimChat.toggleBuddyList()<CR>
         nnoremap <buffer> <silent> r :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> R :py VimChat.refreshBuddyList()<CR>
+        nnoremap <buffer> <silent> <F5> :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> <Leader>n /{{{ (<CR>
         nnoremap <buffer> <silent> <Leader>c :py VimChat.openGroupChat()<CR>
         nnoremap <buffer> <silent> <Leader>ss :py VimChat.setStatus()<CR>
@@ -1066,8 +1086,19 @@ class VimChatScope:
     #}}}
     #{{{ refreshBuddyList
     def refreshBuddyList(self):
-        self.writeBuddyList()
-        vim.command("silent e!")
+        if self.isBuddyListLoaded():
+            self.writeBuddyList()
+            if self.isRefreshBuddyList==1:
+                vim.command("silent checktime "+str(self.buddyListBuffer.number))
+                vim.command("silent echo") # to force the actual refresh
+            else: # we should be in the buddy list window
+                vim.command("silent e!") 
+
+            # try to restore fold levels
+            # this only get us to the account overview, we need to find a better way to restore it
+            # entirely (considering also new elements/buddies/accounts etc.)
+            if int(vim.eval("g:vimchat_foldBuddyListAfterUpdate")) == 1:
+                vim.command("normal zMzr")
     #}}}
     #{{{ hasBuddyShowChanged
     def hasBuddyShowChanged(self,accountJid,jid,showNew):
@@ -1593,6 +1624,8 @@ You can type \on to reconnect.
             self.oldShowList[account][chat] = show
             if not self.oldShowList[account].get('online-since'):
                 self.oldShowList[account]['online-since'] = int(time.time())
+            if self.isRefreshBuddyList==1:
+                self.refreshBuddyList()
         except Exception, e:
             print "Error in presenceUpdate: " + str(e)
     #}}}
@@ -1771,6 +1804,7 @@ let g:vimchat_loaded = 1
 com! VimChat py VimChat.init() 
 com! VimChatStop py VimChat.stop() 
 com! VimChatBuddyList py VimChat.toggleBuddyList()
+com! VimChatUpdateBuddyList py VimChat.refreshBuddyList()
 com! VimChatViewLog py VimChat.openLogFromChat()
 com! VimChatJoinGroupChat py VimChat.openGroupChat()
 com! VimChatOtrVerifyBuddy py VimChat.otrVerifyBuddy()
@@ -1819,7 +1853,9 @@ fu! VimChatCheckVars()
     if !exists('g:vimchat_showPresenceNotification')
         let g:vimchat_showPresenceNotification=""
     endif
-
+    if !exists('g:vimchat_autoRefreshBuddyList')
+        let g:vimchat_autoRefreshBuddyList=1
+    endif
     return 1
 endfu
 "}}}
