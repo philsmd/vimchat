@@ -557,6 +557,9 @@ class VimChatScope:
         #{{{ jabberAddBuddy
         def jabberAddBuddy(self, jid):
             m = xmpp.protocol.Presence(to=jid, typ="subscribe")
+        #{{{ jabberDelete
+        def jabberDelete(self,jid):
+            m = xmpp.protocol.Iq('set',self._queryNS,payload=[xmpp.simplexml.Node('item',{'jid':jid,'subscription':'remove'})])
             self.jabber.send(m)
         #}}}
         #To Jabber Functions
@@ -1077,6 +1080,27 @@ class VimChatScope:
             if str(self.buddyListBuffer.number) in str(vim.eval('tabpagebuflist()')):
                 return True
         return False
+    #{{{ getDesiredAccount
+    def getDesiredAccount(self,accountSelect=None):
+        if accountSelect == None:
+            accountSelect = self.accounts
+        if len(accountSelect) > 1:
+            accountList = []
+            for account in accountSelect:
+                accountList.append(account)
+                print "#"+str(len(accountList))+" "+account
+            while True:
+                input = int(vim.eval('input("Enter the account number from the above list: ")'))
+                vim.command("echo '  '")    # clear ex input
+                if input > 0 and input <= len(accountList):
+                    return accountList[input-1]
+                else:
+                    print "Please specify a number between 1 and "+str(len(accountList))
+        elif len(accountSelect) == 1:
+            return accountSelect.iterkeys().next()
+        else:
+            return None
+    #}}}
     #{{{ getPyNotificationPosition
     def getPyNotificationPosition(self,position=""):
         display = None
@@ -1253,6 +1277,7 @@ class VimChatScope:
         nnoremap <buffer> <silent> R :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> <F5> :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> a :py VimChat.addBuddy()<CR>
+        nnoremap <buffer> <silent> d :py VimChat.deleteBuddy()<CR>
         nnoremap <buffer> <silent> <Leader>n /{{{ (<CR>
         nnoremap <buffer> <silent> <Leader>c :py VimChat.openGroupChat()<CR>
         nnoremap <buffer> <silent> <Leader>ss :py VimChat.setStatus()<CR>
@@ -1440,6 +1465,34 @@ You can type \on to reconnect.
                     return
             self.accounts[account].jabberAddBuddy(buddyJid)
             print "Authorization request sent. Please wait for the request to be accepted"
+    #}}}
+    #{{{ deleteBuddy
+    def deleteBuddy(self, jid=None):
+        if len(self.accounts) < 1:
+            print "Not Connected!  Please connect first."
+            return
+        account = None
+        if not jid:
+            try:
+                account,buddyJid = self.getBuddyListItem('jid')
+            except:
+                account = self.getBuddyListItem('account')
+                buddyJid = None
+            if not buddyJid:
+                buddyJid = str(vim.eval('input("Buddy name (or Jid) to delete: ")'))
+            [jid,user,resource] = self.getJidParts(buddyJid)
+
+        if account == None:
+            account = self.getDesiredAccount()
+            if account == None:
+                print "Account not found"
+                return
+        if str(vim.eval('input("Are you sure you want to delete buddy \''+jid+'\' from your buddy list? [Y/n] ")')) != "Y":
+            return
+        self.accounts[account].jabberDelete(jid)
+        vim.command("echo '  '")
+        print "Delete request successfully sent"
+        self.refreshBuddyList()
     #}}}
 
     #CHAT BUFFERS
