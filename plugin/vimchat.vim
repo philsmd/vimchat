@@ -552,6 +552,8 @@ class VimChatScope:
         #{{{ jabberUnSubscribe
         def jabberUnSubscribe(self,jid):
             m = xmpp.protocol.Presence(to=jid, typ="unsubscribed")
+            self.jabber.send(m)
+        #}}}
         #{{{ jabberAddBuddy
         def jabberAddBuddy(self, jid):
             m = xmpp.protocol.Presence(to=jid, typ="subscribe")
