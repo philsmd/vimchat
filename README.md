@@ -84,6 +84,7 @@ __Optional ~/.vimrc Variables:__
 * let g:vimchat\_autoLogin = (0 or 1), default is 0
 * let g:vimchat\_statusAutoCompletion = (0 or 1), default is 1
 * let g:vimchat\_restoreSessionStatus = (0 or 1), default is 0
+* let g:vimchat\_autoRefreshBuddyList = (0 or 1), default is 1
 
 # Contributors 
 
