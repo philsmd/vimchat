@@ -848,6 +848,7 @@ class VimChatScope:
         if account == None:
             return
         status=show+","+status+","+priority
+        config = RawConfigParser();
         config.read(self.configFilePath)
         config.read(self.configFilePath)
         if not config.has_section('last_status'):
