@@ -1223,7 +1223,9 @@ You can type \on to reconnect.
             if account == None:
                 print "Account not found"
                 return
-        if str(vim.eval('input("Are you sure you want to block buddy \''+jid+'\' from your buddy list? [Y/n] ")')) != "Y": return self.accounts[account].jabberBlock(jid) vim.command("echo '  '")
+        if str(vim.eval('input("Are you sure you want to block buddy \''+jid+'\' from your buddy list? [Y/n] ")')) != "Y":
+            return self.accounts[account].jabberBlock(jid)
+        vim.command("echo '  '")
         print "Block request successfully sent"
         self.refreshBuddyList()
     #}}}
