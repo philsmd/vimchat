@@ -375,7 +375,6 @@ class VimChatScope:
             self._queryNS = 'jabber:iq:roster'
             threading.Thread.__init__ ( self )
             self.jabber = jabberClient
-            self._queryNS = 'jabber:iq:roster'
             self.online = 0
             self._protocol = 'xmpp'
         #}}}
