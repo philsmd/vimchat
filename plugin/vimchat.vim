@@ -96,6 +96,7 @@ class VimChatScope:
     #Global Variables
     accounts = {}
     groupChatNames = [] # The names you are using in group chats.
+    configFilePath = None
     otr_basedir = '~/.vimchat/otr'
     otr_keyfile = 'otrkey'
     otr_fingerprints = 'fingerprints'
@@ -551,6 +552,9 @@ class VimChatScope:
         #{{{ jabberUnSubscribe
         def jabberUnSubscribe(self,jid):
             m = xmpp.protocol.Presence(to=jid, typ="unsubscribed")
+        #{{{ jabberAddBuddy
+        def jabberAddBuddy(self, jid):
+            m = xmpp.protocol.Presence(to=jid, typ="subscribe")
             self.jabber.send(m)
         #}}}
         #To Jabber Functions
@@ -867,15 +871,14 @@ class VimChatScope:
     def signOn(self):
         accounts = self.getAccountsFromConfig()
         if len(accounts) == 0:
-            print 'No accounts found in the vimchat config %s.'\
-                % (self.configFilePath)
-            return
-        for account in accounts:
-            print account
-        account = vim.eval(
-            'input("Enter the account from the above list: ")')
-        if account in accounts:
-            password = accounts[account]
+            if self.accounts == 0:
+                print 'No accounts found in the vimchat config %s.' % (self.configFilePath)
+                return
+            else:
+                print 'You are currently connected to all available accounts'
+                return
+        account = self.getDesiredAccount(accounts)
+        if account:
             self._signOn(account, password)
             self.refreshBuddyList()
         else:
@@ -938,14 +941,11 @@ class VimChatScope:
     #}}}
     #{{{ signOff
     def signOff(self):
-        accounts = self.accounts
-        if len(accounts) == 0:
+        account = self.getDesiredAccount()
+        if not account:
             print 'No accounts found'
             return
-        for account in accounts:
-            print account
-        account = vim.eval(
-            'input("Enter the account from the above list: ")')
+        vim.command("normal \<ESC>")
         self._signOff(account)
         accounts = self.accounts
         if not accounts or len(accounts)==0:
@@ -997,7 +997,7 @@ class VimChatScope:
         else:
             print 'Error: [%s] is an invalid account.' % (account)
             if self.growl_enabled:
-                    self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
+                self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
     #}}}
     #{{{ showStatus
     def showStatus(self):
@@ -1088,6 +1088,27 @@ class VimChatScope:
                 x = 7
                 y = 12 
         return x,y
+    #}}}
+    #{{{ getDesiredAccount
+    def getDesiredAccount(self,accountSelect=None):
+        if accountSelect == None:
+            accountSelect = self.accounts
+        if len(accountSelect) > 1:
+            accountList = []
+            for account in accountSelect:
+                accountList.append(account)
+                print "#"+str(len(accountList))+" "+account
+            while True:
+                input = int(vim.eval('input("Enter the account number from the above list: ")'))
+                vim.command("echo '  '")    # clear ex input
+                if input > 0 and input <= len(accountList):
+                    return accountList[input-1]
+                else:
+                    print "Please specify a number between 1 and "+str(len(accountList))
+        elif len(accountSelect) == 1:
+            return accountSelect.iterkeys().next()
+        else:
+            return None
     #}}}
     #{{{ isGroupChat
     def isGroupChat(self):
@@ -1198,6 +1219,7 @@ class VimChatScope:
         nnoremap <buffer> <silent> r :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> R :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> <F5> :py VimChat.refreshBuddyList()<CR>
+        nnoremap <buffer> <silent> a :py VimChat.addBuddy()<CR>
         nnoremap <buffer> <silent> <Leader>n /{{{ (<CR>
         nnoremap <buffer> <silent> <Leader>c :py VimChat.openGroupChat()<CR>
         nnoremap <buffer> <silent> <Leader>ss :py VimChat.setStatus()<CR>
@@ -1210,6 +1232,11 @@ class VimChatScope:
     #}}}
     #{{{ getBuddyListItem
     def getBuddyListItem(self, item):
+        if not self.isBuddyListLoaded():
+            return None
+
+        fl = int(vim.eval("foldlevel('.')"))
+        result = None
         if item == 'jid':
             vim.command("normal zo")
             vim.command("normal ]z")
@@ -1223,7 +1250,39 @@ class VimChatScope:
             vim.command("normal [z")
 
             account = str(vim.current.line).split(' ')[2]
-            return account, toJid
+            result = account, toJid
+        elif item == 'account':
+            vim.command("normal zo")
+            vim.command("normal ]z")
+            vim.command("normal zc")
+            curLine = str(vim.current.line).replace("{{{","").strip()
+            if not re.search("[+]",curLine):   # or use fl>1
+                if re.search("}}}",curLine):
+                    fl=4-int(vim.eval("foldlevel('.')"))
+                    vim.command("normal zo")
+                vim.command("normal ]z")
+                vim.command("normal [z")
+                vim.command("normal zc")
+                curLine = str(vim.current.line).replace("{{{","").strip()
+                if not re.search("[+]",curLine):
+                    vim.command("normal zo")
+                    vim.command("normal k")
+                    vim.command("normal zc")
+                    curLine = str(vim.current.line).replace("{{{","").strip()
+                else:
+                    fl-=1
+            lineSplit = curLine.split(' ')
+            if len(lineSplit) > 2:
+                result = curLine.split(' ')[2]
+            else:   # take the last one
+                result = lineSplit[len(lineSplit)-1]
+            
+        # restore previous fold level
+        flNew = int(vim.eval("foldlevel('.')"))
+        while fl>flNew and fl>0:
+            vim.command("normal zm")
+            fl-=1
+        return result
     #}}}
     #{{{ beginChatFromBuddyList
     def beginChatFromBuddyList(self):
@@ -1329,6 +1388,25 @@ You can type \on to reconnect.
         # TODO: find a better place to add this "periodic" call
         # vim inputs() don't work well when started from threads
         self.processAuthorizationRequest()
+    #}}}
+    #{{{ addBuddy
+    def addBuddy(self, buddyJid=None):
+        if len(self.accounts) < 1:
+            print "Not Connected!  Please connect first."
+            return
+        if not buddyJid:
+            buddyJid = str(vim.eval('input("Buddy name (or Jid) to add: ")'))
+        if buddyJid == None or buddyJid == "None":
+            print "Could not add buddy to your buddy list"
+        else:
+            account = self.getBuddyListItem('account')
+            if account == None:
+                account = self.getDesiredAccount()
+                if account == None:
+                    print "Account not found"
+                    return
+            self.accounts[account].jabberAddBuddy(buddyJid)
+            print "Authorization request sent. Please wait for the request to be accepted"
     #}}}
 
     #CHAT BUFFERS
