@@ -989,9 +989,7 @@ class VimChatScope:
             print "Not Connected!  Please connect first."
             return 0
 
-        if self.buddyListBuffer:
-            bufferList = vim.eval('tabpagebuflist()')
-            if str(self.buddyListBuffer.number) in bufferList:
+        if self.isBuddyListLoaded():
                 vim.command('sbuffer ' + str(self.buddyListBuffer.number))
                 vim.command('hide')
                 return
@@ -1054,14 +1052,12 @@ class VimChatScope:
     def beginChatFromBuddyList(self):
         account, toJid = self.getBuddyListItem('jid')
         [jid,user,resource] = self.getJidParts(toJid)
-
         buf = VimChat.beginChat(account, jid)
         if not buf:
             #print "Error getting buddy info: " + jid
             return 0
-
-        vim.command('sbuffer ' + str(buf.number))
         VimChat.toggleBuddyList()
+        vim.command('sbuffer ' + str(buf.number))
         vim.command('wincmd K')
     #}}}
     #{{{ refreshBuddyList
@@ -1218,6 +1214,13 @@ You can type \on to reconnect.
 
         #Create sending buffer
         sendBuffer = "sendTo:" + toJid
+        
+        # check if we have an open buffer named like that one
+        for w in vim.windows:
+            if re.search(sendBuffer, w.buffer.name):
+                # jump to it
+                vim.command("sbuffer "+str(w.buffer.number))
+                return
         vim.command("silent bo new " + sendBuffer)
         vim.command("silent let b:buddyId = '" + toJid +  "'")
         vim.command("silent let b:account = '" + account +  "'")
@@ -1245,9 +1248,7 @@ You can type \on to reconnect.
 
     #}}}
     #{{{ appendMessage
-    def appendMessage(
-        self, account, buf, message, showJid='Me',secure=False):
-
+    def appendMessage(self, account, buf, message, showJid='Me',secure=False):
         if not buf:
             print "VimChat: Invalid Buffer to append to!"
             return 0
@@ -1312,7 +1313,7 @@ You can type \on to reconnect.
             VimChat.log(account, jid, line)
 
         #move cursor to bottom of buffer
-        #self.moveCursorToBufBottom(buf)
+        self.moveCursorToBufBottom(buf)
     #}}}
     #{{{ deleteChat
     def deleteChat(self):
@@ -1333,9 +1334,11 @@ You can type \on to reconnect.
     #{{{ openGroupChat
     def openGroupChat(self):
         accounts = self.showAccountList()
+        if accounts == None or len(accounts)<1:
+            print 'Error: no initialized account found'
+            return
 
-        input = vim.eval(
-            'input("Account (enter the number from the above list): ")')
+        input = vim.eval('input("Account (enter the number from the above list): ")')
         if not re.match(r'\d+$', input):
             vim.command('echohl ErrorMsg')
             vim.command('echo "\\nYou must enter an integer corresponding'
@@ -1370,6 +1373,10 @@ You can type \on to reconnect.
     #}}}
     #{{{ joinChatroom
     def joinChatroom(self):
+        if not self.configFilePath:
+            print 'Error: VimChat not started yet. Unknown config file'
+            return
+
         if not os.path.exists(self.configFilePath):
             print 'Error: Config file %s does not exist' % (self.configFilePath)
             return
@@ -1396,10 +1403,13 @@ You can type \on to reconnect.
             print sys.exc_info()[0], sys.exc_info()[1]
             return
 
+        if len(chatrooms)<1:
+            print 'Error: No chatroom found. Please configure one first.'
+            return
+
         for room in chatrooms:
             print room
-        input = vim.eval(
-            'input("Enter the room name from the above list: ")')
+        input = vim.eval('input("Enter the room name from the above list: ")')
         if input in chatrooms:
             self._openGroupChat(self.accounts[chatrooms[input]['account']],
                 chatrooms[input]['room'], chatrooms[input]['username'])
@@ -1408,12 +1418,17 @@ You can type \on to reconnect.
     #}}}
     #{{{ moveCursorToBufBottom
     def moveCursorToBufBottom(self, buf):
-        # TODO: Need to make sure this only happens if this buffer doesn't
-        # have focus.  Otherwise, this hijacks the users cursor.
-        return
+        curBuf = vim.current.buffer.number
+        if curBuf != buf.number and (int(vim.eval('exists("b:buddyId")')) == 0 or not re.search(str(vim.eval("b:buddyId")),vim.current.buffer.name)):
+            # skip every cursor movements (otherwise user is being distracted)
+            return
+        # is the buffer present?
         for w in vim.windows:
-            if w.buffer == buf:
-                w.cursor = (len(buf), 0)
+            if w.buffer.number == buf.number:
+                w.cursor = (len(buf), 0) # it moves the cursor but only when we give the window focus
+                vim.command("sbuffer "+str(buf.number))
+                vim.command("normal \<ESC>h")   # some movement forces the refresh of the cursor position
+                vim.command("sbuffer "+str(curBuf)) # if we were in the sendBuffer 
     #}}}
 
     #ACCOUNT
@@ -1469,9 +1484,9 @@ You can type \on to reconnect.
     #}}}
     #{{{ openLogFromChat
     def openLogFromChat(self):
-        try:
+        if vim.eval("exists('b:buddyId')") == '1':
             jid = vim.eval('b:buddyId')
-        except:
+        else:
             print "You may only open the log from a chat buffer"
             return
         account = vim.eval('b:account')
@@ -1554,9 +1569,6 @@ You can type \on to reconnect.
         for jid,account in self.accounts.items():
             account.jabberPresenceUpdate(show,status,priority)
 
-        # update Icon if there are several icons available
-        if self.statusIcon != None: 
-            self.statusIcon.changeStatus(show)
         print "Updated status to: " + str(priority) + " -- " + show + " -- " + status
     #}}}
 
@@ -1620,9 +1632,9 @@ You can type \on to reconnect.
 
         try:
             VimChat.appendMessage(account, buf, message, fromJid, secure)
-        except:
+        except Exception, e:
             print 'Error zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
-            print 'could not appendMessage:', message, 'from:', fromJid
+            print 'could not appendMessage:', message, 'from:', fromJid, e
 
         # Highlight the line.
         # TODO: This only works if the right window has focus.  Otherwise it
