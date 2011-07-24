@@ -531,6 +531,11 @@ class VimChatScope:
                 pass
         #}}}
 
+        #{{{ jabberDelete
+        def jabberDelete(self,jid):
+            m = xmpp.protocol.Iq('set',self._queryNS,payload=[xmpp.simplexml.Node('item',{'jid':jid,'subscription':'remove'})])
+            self.jabber.send(m)
+        #}}}
         #To Jabber Functions
         #{{{ jabberOnSendMessage
         def jabberOnSendMessage(self, tojid, msg):
@@ -967,6 +972,72 @@ class VimChatScope:
                 return buf
         return None
     #}}}
+    #{{{ getDesiredAccount
+    def getDesiredAccount(self,accountSelect=None):
+        if accountSelect == None:
+            accountSelect = self.accounts
+        if len(accountSelect) > 1:
+            accountList = []
+            for account in accountSelect:
+                accountList.append(account)
+                print "#"+str(len(accountList))+" "+account
+            while True:
+                input = int(vim.eval('input("Enter the account number from the above list: ")'))
+                vim.command("echo '  '")    # clear ex input
+                if input > 0 and input <= len(accountList):
+                    return accountList[input-1]
+                else:
+                    print "Please specify a number between 1 and "+str(len(accountList))
+        elif len(accountSelect) == 1:
+            return accountSelect.iterkeys().next()
+        else:
+            return None
+    #}}}
+    #{{{ getPyNotificationPosition
+    def getPyNotificationPosition(self,position=""):
+        display = None
+        if self.gtk_enabled and position:
+            display = gtk.gdk.display_get_default()
+            screen = display.get_default_screen()
+            if screen.get_n_monitors()>1:
+                posX=0
+                posY=0
+                # get position of statusicon => choose the right monitor
+                #if self.statusIcon:
+                    # icon = self.statusIcon
+                    # posX = icon.getPosX()
+                    # posY = icon.getPosY()
+                # or use the window
+                window = screen.get_root_window()
+                geometry = window.get_position()
+                posX = geometry[0]
+                posY = geometry[1]
+                monitor = screen.get_monitor_at_point(posX, posY)
+                geometry = screen.get_monitor_geometry(monitor)
+                x_max = geometry.width - 1
+                y_max = geometry.height - 1
+            else:
+                x_max = screen.get_width() - 1
+                y_max = screen.get_height() - 1
+
+        x = None
+        y = None
+        if display:
+            if position == "top-right":
+                x = x_max   # when we want to add a border, we need to calculate the tooltip size first
+                y = 12      # when a task bar is at the top there should be at least this minimal distance
+            elif position == "lower-right":
+                x = x_max
+                y = y_max-22
+            elif position == "lower-left":
+                x = 7
+                y = y_max-22
+
+        if (not display or not x) and position == "top-left":
+                x = 7
+                y = 12 
+        return x,y
+    #}}}
     #{{{ isGroupChat
     def isGroupChat(self):
         try:
@@ -1023,6 +1094,7 @@ class VimChatScope:
         nnoremap <buffer> <silent> q :py VimChat.toggleBuddyList()<CR>
         nnoremap <buffer> <silent> r :py VimChat.refreshBuddyList()<CR>
         nnoremap <buffer> <silent> R :py VimChat.refreshBuddyList()<CR>
+        nnoremap <buffer> <silent> d :py VimChat.deleteBuddy()<CR>
         nnoremap <buffer> <silent> <Leader>n /{{{ (<CR>
         nnoremap <buffer> <silent> <Leader>c :py VimChat.openGroupChat()<CR>
         nnoremap <buffer> <silent> <Leader>ss :py VimChat.setStatus()<CR>
@@ -1139,6 +1211,34 @@ You can type \on to reconnect.
             rF.write("}}}\n")
 
         rF.close()
+    #}}}
+    #{{{ deleteBuddy
+    def deleteBuddy(self, jid=None):
+        if len(self.accounts) < 1:
+            print "Not Connected!  Please connect first."
+            return
+        account = None
+        if not jid:
+            try:
+                account,buddyJid = self.getBuddyListItem('jid')
+            except:
+                account = self.getBuddyListItem('account')
+                buddyJid = None
+            if not buddyJid:
+                buddyJid = str(vim.eval('input("Buddy name (or Jid) to delete: ")'))
+            [jid,user,resource] = self.getJidParts(buddyJid)
+
+        if account == None:
+            account = self.getDesiredAccount()
+            if account == None:
+                print "Account not found"
+                return
+        if str(vim.eval('input("Are you sure you want to delete buddy \''+jid+'\' from your buddy list? [Y/n] ")')) != "Y":
+            return
+        self.accounts[account].jabberDelete(jid)
+        vim.command("echo '  '")
+        print "Delete request successfully sent"
+        self.refreshBuddyList()
     #}}}
 
     #CHAT BUFFERS
