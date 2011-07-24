@@ -1078,8 +1078,9 @@ class VimChatScope:
             # try to restore fold levels
             # this only get us to the account overview, we need to find a better way to restore it
             # entirely (considering also new elements/buddies/accounts etc.)
-            if int(vim.eval("g:vimchat_foldBuddyListAfterUpdate")) == 1:
-                vim.command("normal zMzr")
+            if int(vim.eval("g:vimchat_foldBuddyListAfterUpdate")) == 1 and self.buddyListBuffer:
+                if vim.current.buffer.number == self.buddyListBuffer.number:
+                    vim.command("normal zMzr")
     #}}}
     #{{{ hasBuddyShowChanged
     def hasBuddyShowChanged(self,accountJid,jid,showNew):
