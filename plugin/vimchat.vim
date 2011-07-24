@@ -184,16 +184,7 @@ class VimChatScope:
             if config.has_section('accounts'):
                 for jid in config.options('accounts'):
                     password = config.get('accounts', jid)
-                    self._signOn(jid, password)
-
-        if len(self.accounts) and self.statusIcon == None:
-            isStatusIcon = int(vim.eval('g:vimchat_statusicon'))
-            if isStatusIcon != 1:
-                self.gtk_enabled = False
-            if self.gtk_enabled:
-                self.statusIcon = self.StatusIcon()
-                self.statusIcon.start()
-                self.blinktimeout = int(vim.eval('g:vimchat_blinktimeout'))
+                    self._signOn(jid, password) 
     #}}}
     #{{{ stop
     def stop(self):
@@ -597,9 +588,12 @@ class VimChatScope:
                 status=status)
             self._presence = m
             self.jabber.send(m)
+
             # update Buddy list if enabled
             if VimChat.isRefreshBuddyList==1:
                 VimChat.refreshBuddyList()
+            # update Icon if there are several icons available
+            VimChat.changeStatusIcon(show)
         #}}}
         #{{{ jabberGetPresence
         def jabberGetPresence(self):
@@ -781,6 +775,7 @@ class VimChatScope:
             self.status_icon_default = "~/.vimchat/icon.gif"
             self.status_icon_path = self.status_icon_default
             threading.Thread.__init__ ( self )
+            self.status_icon = None
         #}}}
         #{{{ run
         def run(self):
@@ -814,6 +809,18 @@ class VimChatScope:
             gtk.main_quit()
         #}}}
     #}}}
+    #{{{ changeStatusIcon
+    def changeStatusIcon(self,show):
+        if not self.statusIcon:
+            if int(vim.eval('g:vimchat_statusicon')) != 1:
+                self.gtk_enabled = False
+            if self.gtk_enabled:
+                self.statusIcon = self.StatusIcon()
+                self.statusIcon.start()
+                self.blinktimeout = int(vim.eval('g:vimchat_blinktimeout'))
+        # check if now there is a status icon available (and change the status)
+        if self.statusIcon != None:
+            self.statusIcon.changeStatus(show)
     #{{{ class BlinkClearer
     class BlinkClearer(threading.Thread):
         #{{{ __init__
@@ -925,6 +932,13 @@ class VimChatScope:
         account = vim.eval(
             'input("Enter the account from the above list: ")')
         self._signOff(account)
+        accounts = self.accounts
+        if not accounts or len(accounts)==0:
+            vim.command('bdelete!')
+            self.changeStatusIcon("offline")
+            self.oldShowList = {}
+        else:
+            self.refreshBuddyList()
     #}}}
     #{{{ signOffAll
     def signOffAll(self):
