@@ -1872,6 +1872,7 @@ let g:vimchat_loaded = 1
 com! VimChat py VimChat.init() 
 com! VimChatStop py VimChat.stop() 
 com! VimChatBuddyList py VimChat.toggleBuddyList()
+com! -nargs=* VimChatDeleteBuddy py VimChat.deleteBuddy(<args>) 
 com! VimChatViewLog py VimChat.openLogFromChat()
 com! VimChatJoinGroupChat py VimChat.openGroupChat()
 com! VimChatOtrVerifyBuddy py VimChat.otrVerifyBuddy()
