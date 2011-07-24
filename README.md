@@ -62,7 +62,7 @@ Typing \l will bring up a new tab containing log files for the current user.
 
 First install the growl notification system: http://growl.info/
 
-Then download the growl SDK from: http://growl.info/downloads_developers.php
+Then download the growl SDK from: http://growl.info/downloads\_developers.php
 
 Finally navigate into the Bindings/python folder and run: 
     sudo python setup.py install
@@ -81,6 +81,7 @@ __Optional ~/.vimrc Variables:__
 * let g:vimchat\_buddylistmaxwidth = max width of buddy list window, default ''
 * let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]" 
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
+* let g:vimchat\_autoLogin = (0 or 1), default is 0
 
 # Contributors 
 
