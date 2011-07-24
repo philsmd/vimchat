@@ -825,19 +825,45 @@ class VimChatScope:
         #}}}
         #{{{ changeStatus
         def changeStatus(self,statusText=""):
+            if not self.status_icon:
+                return
             if len(statusText)>0:
                 statusText = "_"+statusText
             file_path = os.path.expanduser(re.sub("(\..[^.]*)$", statusText+"\\1", self.status_icon_default))
             if not os.path.exists(file_path): 
-                file_path = os.path.expanduser(self.status_icon_default)
+                # special case logged out from all accounts
+                if (re.match(".*offline.*",statusText)):
+                    self.status_icon.set_visible(False);
+                    return
+                else:
+                    file_path = os.path.expanduser(self.status_icon_default)
                 if not os.path.exists(file_path):
                     return
             self.status_icon_path = file_path
+            if not self.status_icon.get_visible():
+                gtk.gdk.threads_enter()
+                self.status_icon.set_visible(True)
+                gtk.gdk.threads_leave()
             self.status_icon.set_from_file(self.status_icon_path)
+        #}}}
+        #{{{ getPosX
+        def getPosX(self):
+            if self.status_icon:
+                self.status_icon.get_geometry()[1]
+                return geometry[1].x
+            return 0
+        #}}}
+        #{{{ getPosY
+        def getPosY(self):
+            if self.status_icon:
+                geometry = self.status_icon.get_geometry();
+                return geometry[1].y
+            return 0
         #}}}
         #{{{ stop
         def stop(self):
-            self.status_icon.set_visible(False)
+            if self.status_icon:
+                self.status_icon.set_visible(False)
             gtk.main_quit()
         #}}}
     #}}}
