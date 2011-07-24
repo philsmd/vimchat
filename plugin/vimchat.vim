@@ -33,6 +33,7 @@
 "   g:vimchat_statusAutoCompletion = (0 or 1) default is 1
 "   g:vimchat_restoreSessionStatus = (0 or 1) default is 0
 "   g:vimchat_autoRefreshBuddyList = (0 or 1) default is 1
+"   g:vimchat_notificationPosition = position of the pyNotifications default is ""
 
 python <<EOF
 #{{{ Imports
@@ -1014,6 +1015,50 @@ class VimChatScope:
             if str(self.buddyListBuffer.number) in str(vim.eval('tabpagebuflist()')):
                 return True
         return False
+    #{{{ getPyNotificationPosition
+    def getPyNotificationPosition(self,position=""):
+        display = None
+        if self.gtk_enabled and position:
+            display = gtk.gdk.display_get_default()
+            screen = display.get_default_screen()
+            if screen.get_n_monitors()>1:
+                posX=0
+                posY=0
+                # get position of statusicon => choose the right monitor
+                #if self.statusIcon:
+                    # icon = self.statusIcon
+                    # posX = icon.getPosX()
+                    # posY = icon.getPosY()
+                # or use the window
+                window = screen.get_root_window()
+                geometry = window.get_position()
+                posX = geometry[0]
+                posY = geometry[1]
+                monitor = screen.get_monitor_at_point(posX, posY)
+                geometry = screen.get_monitor_geometry(monitor)
+                x_max = geometry.width - 1
+                y_max = geometry.height - 1
+            else:
+                x_max = screen.get_width() - 1
+                y_max = screen.get_height() - 1
+
+        x = None
+        y = None
+        if display:
+            if position == "top-right":
+                x = x_max   # when we want to add a border, we need to calculate the tooltip size first
+                y = 12      # when a task bar is at the top there should be at least this minimal distance
+            elif position == "lower-right":
+                x = x_max
+                y = y_max-22
+            elif position == "lower-left":
+                x = 7
+                y = y_max-22
+
+        if (not display or not x) and position == "top-left":
+                x = 7
+                y = 12 
+        return x,y
     #}}}
     #{{{ isGroupChat
     def isGroupChat(self):
@@ -1746,9 +1791,15 @@ You can type \on to reconnect.
     #{{{ pyNotification
     def pyNotification(self, subject, msg, type):
         if pynotify_enabled:
+            position = str(vim.eval("g:vimchat_notificationPosition"))
+            x,y = self.getPyNotificationPosition(position)
             pynotify.init('vimchat')
             n = pynotify.Notification(subject, msg, type)
             n.set_timeout(10000)
+            if x:
+                n.set_hint("x", x)
+            if y:
+                n.set_hint("y", y)
             n.show()
     #}}}
     #{{{ clearNotify
@@ -1904,6 +1955,8 @@ fu! VimChatCheckVars()
         let g:vimchat_restoreSessionStatus=0
     if !exists('g:vimchat_autoRefreshBuddyList')
         let g:vimchat_autoRefreshBuddyList=1
+    if !exists('g:vimchat_notificationPosition')
+        let g:vimchat_notificationPosition=""
     endif
     return 1
 endfu
