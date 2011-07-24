@@ -930,6 +930,10 @@ class VimChatScope:
     #}}}
     #{{{ showStatus
     def showStatus(self):
+        if self.accounts == None or len(self.accounts)< 1:
+            print 'Error: no initialized account found'
+            return
+
         print self.accounts[self.accounts.keys()[0]].jabberGetPresence()
     #}}}
 
