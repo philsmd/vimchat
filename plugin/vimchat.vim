@@ -29,6 +29,7 @@
 "   g:vimchat_buddylistmaxwidth = max width of buddy list window default ''
 "   g:vimchat_timestampformat = format of the message timestamp default "[%H:%M]" 
 "   g:vimchat_showPresenceNotification = notify if buddy changed status default ""
+"   g:vimchat_foldBuddyListAfterUpdate = (0 or 1) default is 0
 
 python <<EOF
 #{{{ Imports
@@ -1066,8 +1067,19 @@ class VimChatScope:
     #}}}
     #{{{ refreshBuddyList
     def refreshBuddyList(self):
-        self.writeBuddyList()
-        vim.command("silent e!")
+        if self.isBuddyListLoaded():
+            self.writeBuddyList()
+            if self.isRefreshBuddyList==1:
+                vim.command("silent checktime "+str(self.buddyListBuffer.number))
+                vim.command("silent echo") # to force the actual refresh
+            else: # we should be in the buddy list window
+                vim.command("silent e!") 
+
+            # try to restore fold levels
+            # this only get us to the account overview, we need to find a better way to restore it
+            # entirely (considering also new elements/buddies/accounts etc.)
+            if int(vim.eval("g:vimchat_foldBuddyListAfterUpdate")) == 1:
+                vim.command("normal zMzr")
     #}}}
     #{{{ hasBuddyShowChanged
     def hasBuddyShowChanged(self,accountJid,jid,showNew):
@@ -1820,6 +1832,9 @@ fu! VimChatCheckVars()
         let g:vimchat_showPresenceNotification=""
     endif
 
+    if !exists('g:vimchat_foldBuddyListAfterUpdate')
+        let g:vimchat_foldBuddyListAfterUpdate=0
+    endif
     return 1
 endfu
 "}}}
