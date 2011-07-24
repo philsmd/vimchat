@@ -1097,7 +1097,6 @@ You can type \on to reconnect.
 """ % (curJid))
                 continue
             accountPresenceInfo = account.jabberGetPresence()
-            accountPresenceInfo = account.jabberGetPresence()
             presenceString=""
             if accountPresenceInfo[0] != None and accountPresenceInfo[0] != "None" and len(accountPresenceInfo[0])>0:
                 presenceString = str(accountPresenceInfo[0])+":"
@@ -1109,6 +1108,7 @@ You can type \on to reconnect.
                 presenceString = "on: "+str(accountPresenceInfo[1])
             if presenceString:
                 presenceString = "\t"+presenceString+"\n"
+            accountText = u"{{{ [+] %s\n%s"%(curJid,presenceString)
             rF.write(accountText)
 
             roster = account._roster
