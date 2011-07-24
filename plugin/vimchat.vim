@@ -557,6 +557,8 @@ class VimChatScope:
         #{{{ jabberAddBuddy
         def jabberAddBuddy(self, jid):
             m = xmpp.protocol.Presence(to=jid, typ="subscribe")
+            self.jabber.send(m)
+        #}}}
         #{{{ jabberDelete
         def jabberDelete(self,jid):
             m = xmpp.protocol.Iq('set',self._queryNS,payload=[xmpp.simplexml.Node('item',{'jid':jid,'subscription':'remove'})])
