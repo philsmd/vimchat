@@ -525,6 +525,7 @@ class VimChatScope:
                 if str(vim.eval('g:vimchat_showPresenceNotification')).find(str(show)) != -1:
                     onlineUser = VimChat.getJidParts(accountName)[0]
                     if VimChat.hasBuddyShowChanged(self._jids, onlineUser, str(show)):
+                        onlineUser = VimChat.formatedJid(self._jids, onlineUser)
                         VimChat.pyNotification('Presence event', "<b>"+onlineUser+"</b>\nis now "+str(show), 'dialog-information')
                 VimChat.presenceUpdate(self._jids,accountName,chat,show,status,priority)
             except:
@@ -956,6 +957,14 @@ class VimChatScope:
 
         return [jid,user,resource]
     #}}}
+    #{{{ formatedJid
+    def formatedJid(self, account, jid):
+        # avoid to show strange email addresses (e.g. for facebook)
+        # could also be the default behaviour to display the buddy name instead of his/her email
+        if re.search("facebook.com", jid):		# TODO add other's to this list (e.g. with or)
+        	jid = self.accounts[account]._roster.getName(jid)
+        return jid
+    #}}}
     #{{{ getTimestamp
     def getTimestamp(self):
         return time.strftime(self.timeformat)
@@ -1263,6 +1272,7 @@ You can type \on to reconnect.
             secureString = "(*" + secure + "*)"
 
         #Get the first line
+        user = str(self.formatedJid(account,user))
         if resource:
             line = tstamp + " " + secureString + \
                 user + "/" + resource + ": " + lines.pop(0);
@@ -1630,6 +1640,7 @@ You can type \on to reconnect.
         # vim.command("call matchadd('Error', '\%' . line('$') . 'l')")
 
         try:
+            jid = self.formatedJid(account,jid)
             self.notify(jid, message, groupChat)
         except:
             print 'Could not notify:', message, 'from:', jid
