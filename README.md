@@ -81,6 +81,8 @@ __Optional ~/.vimrc Variables:__
 * let g:vimchat\_buddylistmaxwidth = max width of buddy list window, default ''
 * let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]" 
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
+* let g:vimchat\_proxy = proxy server to be used, format user:pass@host:port, default is no proxy
+* let g:vimchat\_nonStandardPort = port number to use, default is no special port settings
 
 # Contributors 
 

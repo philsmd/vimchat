@@ -29,6 +29,8 @@
 "   g:vimchat_buddylistmaxwidth = max width of buddy list window default ''
 "   g:vimchat_timestampformat = format of the message timestamp default "[%H:%M]" 
 "   g:vimchat_showPresenceNotification = notify if buddy changed status default ""
+"   g:vimchat_proxy = proxy server to be used, format user:pass@host:port, default None
+"   g:vimchat_nonStandardPort = port number to use default is None
 
 python <<EOF
 #{{{ Imports
@@ -103,6 +105,8 @@ class VimChatScope:
     blinktimeout = -1
     timeformat = "[%H:%M]"
     oldShowList = {}
+    proxy={} 
+    nonStandardPort = None
 
     #{{{ init
     def init(self):
@@ -154,6 +158,14 @@ class VimChatScope:
 
         # Timestamp format
         self.timeformat = vim.eval('g:vimchat_timestampformat')
+
+        # Setup proxy settings
+        if vim.eval("exists('g:vimchat_proxy')") == '1':
+            self.setupProxy()
+
+        # Setup non-standard port (e.g. in case of proxy with blocked ports)
+        if vim.eval("exists('g:vimchat_nonStandardPort')") == '1':
+            self.nonStandardPort = int(vim.eval("g:vimchat_nonStandardPort"))
 
         # Signon to accounts listed in .vimrc
         if vim.eval("exists('g:vimchat_accounts')") == '1':
@@ -852,7 +864,13 @@ class VimChatScope:
         JID=xmpp.protocol.JID(jid)
         jabberClient = xmpp.Client(JID.getDomain(),debug=[])
 
-        con = jabberClient.connect()
+        # Proxy support and non-standard port (5222)
+        server = None
+        if self.nonStandardPort:
+            result = self.getSVRRecord(str(jabberClient.Server))
+            if result:
+                server = (result,self.nonStandardPort)
+        con = jabberClient.connect(server=server,proxy=self.proxy,use_srv=True)
         if not con:
             print 'could not connect!\n'
             if self.growl_enabled:
@@ -927,6 +945,30 @@ class VimChatScope:
             print 'Error: [%s] is an invalid account.' % (account)
             if self.growl_enabled:
                     self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
+    #}}}
+    #{{{ setupProxy 
+    def setupProxy(self):
+        proxy_settings=str(vim.eval('g:vimchat_proxy'))
+        if len(proxy_settings) < 1:
+            return
+        # parse proxy string
+        proxy_parts = proxy_settings.split('@')
+        host_string=""
+        if len(proxy_parts)>1:
+            user_pass = proxy_parts[0]
+            user_pass_split = user_pass.split(':')
+            self.proxy['username'] = user_pass_split[0]
+            if len(user_pass_split) > 1:
+                self.proxy['password'] = user_pass_split[1]
+            host_string=proxy_parts[1]
+        else:
+            host_string=proxy_parts[0]
+        host_parts = host_string.split(':')
+        if len(host_parts) > 1:
+            self.proxy['host'] = host_parts[0]
+            self.proxy['port'] = host_parts[1]
+        else:
+            self.proxy['host'] = host_parts[0]
     #}}}
     #{{{ showStatus
     def showStatus(self):
