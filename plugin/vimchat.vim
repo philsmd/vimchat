@@ -968,6 +968,12 @@ class VimChatScope:
                 return buf
         return None
     #}}}
+    #{{{ foldBuddyList
+    def foldBuddyList(self):
+        if int(vim.eval("g:vimchat_foldBuddyListAfterUpdate")) == 1 and self.buddyListBuffer:
+            if vim.current.buffer.number == self.buddyListBuffer.number:
+                vim.command("normal zMzr")
+    #}}}
     #{{{ isGroupChat
     def isGroupChat(self):
         try:
@@ -1033,6 +1039,9 @@ class VimChatScope:
         self.setupLeaderMappings()
 
         self.buddyListBuffer = vim.current.buffer
+
+        # fold the buddy list if wante
+        self.foldBuddyList()
     #}}}
     #{{{ getBuddyListItem
     def getBuddyListItem(self, item):
@@ -1076,11 +1085,9 @@ class VimChatScope:
                 vim.command("silent e!") 
 
             # try to restore fold levels
-            # this only get us to the account overview, we need to find a better way to restore it
-            # entirely (considering also new elements/buddies/accounts etc.)
-            if int(vim.eval("g:vimchat_foldBuddyListAfterUpdate")) == 1 and self.buddyListBuffer:
-                if vim.current.buffer.number == self.buddyListBuffer.number:
-                    vim.command("normal zMzr")
+            # this only gets us to the account overview, we need to find a better way to restore it
+            # entirely (considering also the new elements/buddies/accounts etc.)
+            self.foldBuddyList()
     #}}}
     #{{{ hasBuddyShowChanged
     def hasBuddyShowChanged(self,accountJid,jid,showNew):
