@@ -51,7 +51,7 @@ except:
 
 pynotify_enabled = False
 try:
-    if 'DBUS_SESSION_BUS_ADDRESS' in os.environ and int(vim.eval("has('gui_running')"))==0:
+    if 'DBUS_SESSION_BUS_ADDRESS' in os.environ:
         import pynotify
         pynotify_enabled = True
     else:
@@ -70,7 +70,7 @@ except:
     pyotr_logging = False
 
 gtk_enabled = False
-if 'DISPLAY' in os.environ and int(vim.eval("has('gui_running')"))==0:
+if 'DISPLAY' in os.environ:
     try:
         from gtk import StatusIcon
         import gtk
@@ -1091,14 +1091,7 @@ You can type \on to reconnect.
 ******************************
 """ % (curJid))
                 continue
-            accountPresenceInfo = account.jabberGetPresence()
-            if accountPresenceInfo[0] != None:
-                status = str(accountPresenceInfo[1])
-                if status == "None":
-                    status = ''
-                accountText = u"{{{ [+] %s\n\t%s: %s\n"%(curJid,str(accountPresenceInfo[0]),status)
-            else:
-                accountText = u"{{{ [+] %s\n"%(curJid)
+            accountText = u"{{{ [+] %s\n"%(curJid)
             rF.write(accountText)
 
             roster = account._roster
@@ -1127,7 +1120,7 @@ You can type \on to reconnect.
                 
                 if show != u'off':
                     buddyText =\
-                        u"{{{ (%s) %s\n\t%s \n\tGroups: %s\n\t%s: %s\n}}}\n" %\
+                        u"{{{ (%s) %s\n\t%s \n\tGroups: %s\n\t%s:\n%s\n}}}\n" %\
                         (show, name, item, groups, show, status)
                     rF.write(buddyText)
 
