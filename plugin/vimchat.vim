@@ -1538,7 +1538,7 @@ You can type \on to reconnect.
         if not status:
             status = str(
                 vim.eval('input("Status: (away,xa,dnd,chat),message,'+
-                    'priority: ")'))
+                'priority: ")'))
 
         parts = status.split(',')
         show = parts[0]
