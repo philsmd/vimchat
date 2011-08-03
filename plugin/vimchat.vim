@@ -1091,7 +1091,15 @@ You can type \on to reconnect.
 ******************************
 """ % (curJid))
                 continue
-            accountText = u"{{{ [+] %s\n"%(curJid)
+            accountPresenceInfo = account.jabberGetPresence()
+            if accountPresenceInfo[0] != None:
+                status = str(accountPresenceInfo[1])
+                if status == "None":
+                    status = ''
+                accountText = u"{{{ [+] %s\n\t%s: %s\n"%\
+                    (curJid,str(accountPresenceInfo[0]),status)
+            else:
+                accountText = u"{{{ [+] %s\n"%(curJid)
             rF.write(accountText)
 
             roster = account._roster
@@ -1120,8 +1128,8 @@ You can type \on to reconnect.
                 
                 if show != u'off':
                     buddyText =\
-                        u"{{{ (%s) %s\n\t%s \n\tGroups: %s\n\t%s:\n%s\n}}}\n" %\
-                        (show, name, item, groups, show, status)
+                        u"{{{ (%s) %s\n\t%s \n\tGroups: %s\n\t%s: %s\n}}}\n" %\
+                            (show, name, item, groups, show, status)
                     rF.write(buddyText)
 
             rF.write("}}}\n")
@@ -1529,8 +1537,8 @@ You can type \on to reconnect.
     def setStatus(self, status=None):
         if not status:
             status = str(
-                vim.eval('input("Status: (away,xa,dnd,chat),message,\
-                priority: ")'))
+                vim.eval('input("Status: (away,xa,dnd,chat),message,'+
+                    'priority: ")'))
 
         parts = status.split(',')
         show = parts[0]
