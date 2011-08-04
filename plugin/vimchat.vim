@@ -877,9 +877,10 @@ class VimChatScope:
             try:
                 self.accounts[accountJid].disconnect()
             except: pass
-        self.accounts[accountJid] = self.JabberConnection(
-            self, jid, jabberClient, roster)
+
+        self.accounts[accountJid] = self.JabberConnection(self, jid, jabberClient, roster)
         self.accounts[accountJid].start()
+
         # Restore the status of the previous session
         last_status = None
         last_show = last_state = last_priority = ""
@@ -951,9 +952,11 @@ class VimChatScope:
         else:
             print 'Error: [%s] is an invalid account.' % (account)
             if self.growl_enabled:
-                    self.growl_notifier.notify("account status", "VimChat",
-                        "Error signing off %s VimChat" %(account),
-                        self.growl_icon)
+                self.growl_notifier.notify("account status", "VimChat",
+                    "Error signing off %s VimChat" %(account),
+                    self.growl_icon)
+
+                self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
 
     def showStatus(self):
         print self.accounts[self.accounts.keys()[0]].jabberGetPresence()
