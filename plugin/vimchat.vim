@@ -163,7 +163,8 @@ class VimChatScope:
         self.timeformat = vim.eval('g:vimchat_timestampformat')
 
         # Set restore session variable
-        self.sessionStatusRestore = int(vim.eval('g:vimchat_restoreSessionStatus'))
+        self.sessionStatusRestore = int(vim.eval(
+            'g:vimchat_restoreSessionStatus'))
 
         # Signon to accounts listed in .vimrc
         if vim.eval("exists('g:vimchat_accounts')") == '1':
@@ -957,7 +958,8 @@ class VimChatScope:
                     "Error signing off %s VimChat" %(account),
                     self.growl_icon)
 
-                self.growl_notifier.notify ("account status", "VimChat", "Error signing off %s VimChat" %(account), self.growl_icon)
+                self.growl_notifier.notify ("account status", "VimChat",
+                    "Error signing off %s VimChat" %(account), self.growl_icon)
 
     def showStatus(self):
         print self.accounts[self.accounts.keys()[0]].jabberGetPresence()
