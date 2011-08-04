@@ -1686,7 +1686,7 @@ com! VimChatJoinGroupChat py VimChat.openGroupChat()
 com! VimChatOtrVerifyBuddy py VimChat.otrVerifyBuddy()
 com! VimChatOtrSMPRespond py VimChat.otrSmpRespond()
 com! VimChatOtrGenerateKey py VimChat.otrGenerateKey()
-com! -nargs=0 VimChatSetStatus py VimChat.setStatus(<args>)
+com! -nargs=* VimChatSetStatus py VimChat.setStatus(<args>)
 com! VimChatShowStatus py VimChat.showStatus()
 com! VimChatJoinChatroom py VimChat.joinChatroom()
 autocmd! VIMLeave * :VimChatStop
