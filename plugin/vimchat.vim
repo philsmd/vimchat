@@ -878,7 +878,8 @@ class VimChatScope:
                 self.accounts[accountJid].disconnect()
             except: pass
 
-        self.accounts[accountJid] = self.JabberConnection(self, jid, jabberClient, roster)
+        self.accounts[accountJid] = self.JabberConnection(
+            self, jid, jabberClient, roster)
         self.accounts[accountJid].start()
 
         # Restore the status of the previous session
