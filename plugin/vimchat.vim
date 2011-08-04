@@ -30,6 +30,8 @@
 "   g:vimchat_timestampformat = format of the msg timestamp default "[%H:%M]" 
 "   g:vimchat_showPresenceNotification =
 "       notify if buddy changed status default ""
+"   g:vimchat_timestampformat = format of the message timestamp default "[%H:%M]" 
+"   g:vimchat_showPresenceNotification = notify if buddy changed status default ""
 "   g:vimchat_statusAutoCompletion = (0 or 1) default is 1
 
 python <<EOF
@@ -1474,7 +1476,8 @@ class VimChatScope:
                 if oldStatus != None and str(oldStatus) != "None":
                     statusCompletion += ','+str(oldStatus)
             status = str(vim.eval(
-                'input("Status: (away,xa,dnd,chat),message,priority: ")'))
+                'input("Status: (away,xa,dnd,chat),message,priority: ",'+
+                ',"'+statusCompletion+'")'))
 
         parts = status.split(',')
         show = parts[0]

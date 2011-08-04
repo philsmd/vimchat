@@ -89,7 +89,6 @@ __Optional ~/.vimrc Variables:__
 * All python code should follow pep8 guidelines
 * All new features should update documentation in the README
 
-
 # Contributors 
 
 * Philipp [philsmd](https://github.com/philsmd)
