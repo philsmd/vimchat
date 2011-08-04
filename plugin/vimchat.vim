@@ -1477,7 +1477,7 @@ class VimChatScope:
                     statusCompletion += ','+str(oldStatus)
             status = str(vim.eval(
                 'input("Status: (away,xa,dnd,chat),message,priority: ",'+
-                ',"'+statusCompletion+'")'))
+                '"'+statusCompletion+'")'))
 
         parts = status.split(',')
         show = parts[0]
