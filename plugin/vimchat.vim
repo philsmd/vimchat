@@ -955,10 +955,6 @@ class VimChatScope:
             print 'Error: [%s] is an invalid account.' % (account)
             if self.growl_enabled:
                 self.growl_notifier.notify("account status", "VimChat",
-                    "Error signing off %s VimChat" %(account),
-                    self.growl_icon)
-
-                self.growl_notifier.notify ("account status", "VimChat",
                     "Error signing off %s VimChat" %(account), self.growl_icon)
 
     def showStatus(self):
