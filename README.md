@@ -62,7 +62,7 @@ Typing \l will bring up a new tab containing log files for the current user.
 
 First install the growl notification system: http://growl.info/
 
-Then download the growl SDK from: http://growl.info/downloads\_developers.php
+Then download the growl SDK from: http://growl.info/downloads_developers.php
 
 Finally navigate into the Bindings/python folder and run: 
     sudo python setup.py install
