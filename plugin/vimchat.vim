@@ -30,8 +30,6 @@
 "   g:vimchat_timestampformat = format of the msg timestamp default "[%H:%M]" 
 "   g:vimchat_showPresenceNotification =
 "       notify if buddy changed status default ""
-"   g:vimchat_timestampformat = format of the message timestamp default "[%H:%M]" 
-"   g:vimchat_showPresenceNotification = notify if buddy changed status default ""
 "   g:vimchat_autoLogin = (0 or 1) default is 0
 
 python <<EOF
