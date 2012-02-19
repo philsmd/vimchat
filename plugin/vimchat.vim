@@ -994,26 +994,25 @@ class VimChatScope:
 
         self.buddyListBuffer = vim.current.buffer
 
-    def getBuddyListItem(self, item):
-        if item == 'jid':
-            vim.command("normal zo")
-            vim.command("normal ]z")
-            vim.command("normal [z")
-            vim.command("normal j")
+    def getBuddyListItem(self):
+        vim.command("normal zo")
+        vim.command("normal ]z")
+        vim.command("normal [z")
+        vim.command("normal j")
 
-            toJid = vim.current.line
-            toJid = toJid.strip()
+        toJid = vim.current.line
+        toJid = toJid.strip()
 
-            vim.command("normal zc")
-            vim.command("normal [z")
+        vim.command(r"call search('\V{{{ [+]', 'b')") 
 
-            account = str(vim.current.line).split(' ')[2]
-            return account, toJid
+        account = str(vim.current.line).split(' ')[2]
+        return account, toJid
 
     def beginChatFromBuddyList(self):
-        account, toJid = self.getBuddyListItem('jid')
+        account, toJid = self.getBuddyListItem()
         [jid,user,resource] = self.getJidParts(toJid)
 
+        print '**** beginning chat with account:', account
         buf = VimChat.beginChat(account, jid)
         if not buf:
             #print "Error getting buddy info: " + jid
@@ -1390,7 +1389,7 @@ class VimChatScope:
             log.close()
 
     def openLogFromBuddyList(self):
-        account, jid = VimChat.getBuddyListItem('jid')
+        account, jid = VimChat.getBuddyListItem()
         VimChat.openLog(account, jid)
 
     def openLogFromChat(self):
