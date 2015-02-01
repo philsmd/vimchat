@@ -16,7 +16,7 @@ The default icon is ~/.vimchat/icon.gif. To use a different icon for e.g. the aw
 # Requirements
 
 * linux or Mac OS X
-* vim >= 7.3.254
+* vim >= 7.3.154
 * python-xmpp
 
 Suggested libraries:
@@ -93,3 +93,5 @@ __Optional ~/.vimrc Variables:__
 
 * Philipp [philsmd](https://github.com/philsmd)
 * Michael Dillon [michaelcdillon](https://github.com/michaelcdillon)
+* Naveed Massjouni [ironcamel](https://github.com/ironcamel) (author)
+* William Wolf [throughnothing](https://github.com/throughnothing) (author)
