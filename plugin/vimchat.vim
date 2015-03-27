@@ -978,6 +978,7 @@ class VimChatScope:
         setlocal foldtext=VimChatFoldText()
         setlocal nowrap
         setlocal foldmethod=marker
+        setlocal foldmarker={{{,}}}
         nmap <buffer> <silent> <CR> :py VimChat.beginChatFromBuddyList()<CR>
         nnoremap <buffer> <silent> <Leader>l :py VimChat.openLogFromBuddyList()<CR>
         nnoremap <buffer> <silent> B :py VimChat.toggleBuddyList()<CR>
