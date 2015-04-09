@@ -55,7 +55,8 @@ try:
             import json
         except:
             pass
-except:
+except Exception as e:
+    print "error loading vimchat modules:", e
     vim.command('let g:vimchat_loaded = 1')
 
 pynotify_enabled = False
