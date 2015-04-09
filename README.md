@@ -17,7 +17,7 @@ The default icon is ~/.vimchat/icon.gif. To use a different icon for e.g. the aw
 
 * linux or Mac OS X
 * vim >= 7.3.154
-* python-xmpp
+* xmpppy
 
 Suggested libraries:
 
@@ -31,6 +31,18 @@ This works on linux and Mac (tested with MacVim, but required a recompile agains
 If you are running ubuntu linux, here is a command you can run to install all the dependencies:
 
     sudo apt-get install vim-gtk python-xmpp python-notify python-dns python-gtk2
+
+On ubuntu the python-xmpp package seems to work fine. But on arch linux, the corrresponding package is named xmpppy, which for me was giving this error when starting vimchat:
+
+    AttributeError: '_ssl._SSLSocket' object has no attribute 'issuer'
+
+It is because of a bug in the xmpppy library:
+https://github.com/eventlet/eventlet/issues/124#issuecomment-69775480
+
+I got around it by installing this forked version of xmppy:
+https://github.com/ArchipelProject/xmpppy
+
+    pip install git+https://github.com/ArchipelProject/xmpppy
 
 # Installation
 
