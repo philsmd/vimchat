@@ -185,6 +185,8 @@ class VimChatScope:
                 self.statusIcon.start()
                 self.blinktimeout = int(vim.eval('g:vimchat_blinktimeout'))
 
+        self.toggleBuddyList()
+
     def stop(self):
         if self.statusIcon != None:
             self.statusIcon.stop()
@@ -948,7 +950,7 @@ class VimChatScope:
         # 'tabpagebuflist(v:val)'), 'index(v:val, 4) == 0'))
 
         if not self.accounts:
-            print "Not Connected!  Please connect first."
+            print "Could not display buddy list. Type <leader>on to connect."
             return 0
 
         if self.buddyListBuffer:
@@ -1049,7 +1051,7 @@ class VimChatScope:
                     u"""
                     ******************************
                     ERROR: %s IS NOT CONNECTED!!!
-                    You can type \on to reconnect.
+                    You can type <leader>on to reconnect.
                     ******************************
                     """ % (curJid))
                 continue
@@ -1736,6 +1738,5 @@ function! VimChatFoldText()
     let line=strpart('                                     ', 0, (v:foldlevel - 1)).substitute(line,'\s*{\+\s*', '', '')
     return line
 endfunction
-"}}}
 
-" vim:et:fdm=marker:sts=4:sw=4:ts=4
+" vim:et:sts=4:sw=4:ts=4

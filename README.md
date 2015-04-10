@@ -46,17 +46,37 @@ https://github.com/ArchipelProject/xmpppy
 
 # Installation
 
+Just run:
+
     chmod +x install.sh
     ./install.sh
-    This should have created a file at ~/.vimchat/config. Edit this file and add at least one account entry to it. 
+
+The installation script is very simple.
+All it does is copy a few files.
+
+# Configuration
+
+The `install.sh` script should have created a config file `~/.vimchat/config`.
+When you open this file you will see directions and examples.
+Edit this file and add at least one account entry to it.
 
 # Usage
 
-To start using vimchat just start vim and type :VimChat. You should see a window on the left with a list of all your buddies. Type B a couple times to refresh/toggle this list. Hit enter on someone's name to open a chat buffer. Type i (or a or o) to open a send buffer. Type a message and hit enter. 
+To start using vimchat just start vim and enter `:VimChat`.
+You should see a window on the left with a list of all your buddies.
+Type `B` to toggle this list.
+Hit enter on someone's name to open a chat buffer.
+
+In a chat buffer, type `i` (or `a` or `o`) to open a send buffer.
+Type a message and hit enter. 
 
 # Buddy List
 
-The buddy list can be toggled by typing B in normal mode from a vimchat buffer. Toggling the buddy list also refreshes it. If you are not currently in a vimchat buffer, you can open it with the :VimChatBuddyList command.
+The buddy list can be toggled by typing `B` in normal mode from any vimchat
+buffer.
+Toggling the buddy list also refreshes it.
+If you are not currently in a vimchat buffer, you can open it with the
+`:VimChatBuddyList` command.
 
 The buddy list is comprised of folds, and unfolding any buddy will show items like status, away message, and the groups that he or she belongs to.
 
@@ -66,9 +86,19 @@ Pressing \l while on a buddy entry in the buddy list will bring up the log files
 
 # Chat Buffers
 
-When you enter into insert mode from a chat window (for example by typing i), it will pop up a send buffer. In the send buffer you simply type your message and hit enter. Multiple lines can also be sent by typing the lines, then selecting what you want to send in visual mode and pressing enter.
+When you enter into insert mode from a chat window (for example by typing `i`),
+it will pop up a send buffer.
+In the send buffer you simply type your message and hit enter.
+To send multiple lines, select the lines in visual mode and then hit enter.
 
-Typing \l will bring up a new tab containing log files for the current user. 
+Typing `<leader>l` will bring up a new tab containing log files for the current
+user. 
+
+# Chat Rooms
+
+You can configure chat rooms in your vimchat config file.
+To join a chat room type `<leader>j`.
+This will display a list of rooms which you can choose from.
 
 # Growl Integration
 
