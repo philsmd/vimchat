@@ -56,6 +56,7 @@ All it does is copy a few files.
 
 # Configuration
 
+It is important to update the configuration file before you run vimchat for the first time.
 The `install.sh` script should have created a config file `~/.vimchat/config`.
 When you open this file you will see directions and examples.
 Edit this file and add at least one account entry to it.
@@ -82,7 +83,7 @@ The buddy list is comprised of folds, and unfolding any buddy will show items li
 
 Once in the buddy list, you can scroll through your buddies and hit enter when your cursor is on the buddy you want to chat with.
 
-Pressing \l while on a buddy entry in the buddy list will bring up the log files (if any) for that user. 
+Pressing `<leader>l` while on a buddy entry in the buddy list will bring up the log files (if any) for that user. 
 
 # Chat Buffers
 
@@ -109,9 +110,9 @@ Then download the growl SDK from: http://growl.info/downloads_developers.php
 Finally navigate into the Bindings/python folder and run: 
     sudo python setup.py install
 
-# Options
+# Optional Settings
 
-__Optional ~/.vimrc Variables:__
+You can can update your `~/.vimrc` with these settings to customize vimchat. All of these settings are optional.
 
 * let g:vimchat\_buddylistwidth = width of buddy list, default is 30
 * let g:vimchat\_logpath = path to store log files, default is ~/.vimchat/logs
@@ -124,12 +125,9 @@ __Optional ~/.vimrc Variables:__
 * let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]" 
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
 
-# Hacking
+# Contributing
 
-* Keep all lines to 80 characters wide or less
-* All python code should follow pep8 guidelines
-* All new features should update documentation in the README
-
+Pull requests are welcome. Please follow the pep 8 style guidelines for the python code.
 
 # Contributors 
 
