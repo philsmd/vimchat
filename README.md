@@ -1,17 +1,17 @@
 # About
 
-Vimchat is a vim plugin that allows you to do instant messaging from within the vim text editor. Note that this only works with vim, not gvim.
+Vimchat is a chat plugin for the vim text editor. It allows you to send and receive instant messages and participate in chat rooms all inside of vim. It supports the XMPP/jabber protocol, but you can also connect to other services such as IRC, AIM, ICQ, MSN, etc. via jabber transports. It's amazing isn't it. See the screenshots:
 
 [Screenshot 1](http://ironcamel.com/files/vimchat1.png) [Screenshot 2](http://ironcamel.com/files/vimchat2.png)
 
 # Features
 
-Vimchat allows you to easily connect to jabber servers such as Google Talk. It is also possible to connect to other services such as IRC, AIM, ICQ, and MSN. You just need to set up jabber transports.
-
 Vimchat supports encryption via OTR (off the record).
 
-Vimchat can use status icons in the system tray which will blink when you receive new messages. You simply need to put any icon you would like to use at ~/.vimchat/icon[\_status].gif. 
-The default icon is ~/.vimchat/icon.gif. To use a different icon for e.g. the away status put an icon at ~/.vimchat/icon\_away.gif
+Vimchat supports status icons which will blink in the system tray when you receive new messages.
+The default icons are installed at `~/.vimchat/icon*.gif`.
+You can overwrite these with your own custom icons.
+For example, to use a different icon for the away status, copy your custom icon to `~/.vimchat/icon_away.gif`.
 
 # Requirements
 
