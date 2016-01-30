@@ -1023,7 +1023,7 @@ class VimChatScope:
 
         vim.command('sbuffer ' + str(buf.number))
         VimChat.toggleBuddyList()
-        vim.command('wincmd K')
+        vim.command('wincmd L')
 
     def refreshBuddyList(self):
         self.writeBuddyList()
@@ -1130,11 +1130,12 @@ class VimChatScope:
         setlocal nosi
         setlocal filetype=vimchat
         setlocal syntax=vimchat
-        setlocal wrap
+        setlocal nowrap
         setlocal foldmethod=marker
         nnoremap <buffer> <silent> i :py VimChat.sendBufferShow()<CR>
         nnoremap <buffer> <silent> o :py VimChat.sendBufferShow()<CR>
         nnoremap <buffer> <silent> a :py VimChat.sendBufferShow()<CR>
+        nnoremap <buffer> <silent> <BS> :py VimChat.sendBufferShow()<CR>
         nnoremap <buffer> <silent> B :py VimChat.toggleBuddyList()<CR>
         nnoremap <buffer> <silent> q :py VimChat.deleteChat()<CR>
         au CursorMoved <buffer> exe 'py VimChat.clearNotify()'
@@ -1206,11 +1207,13 @@ class VimChatScope:
             secureString = "(*" + secure + "*)"
 
         #Get the first line
+        """
         if resource:
             line = tstamp + " " + secureString + \
                 user + "/" + resource + ": " + lines.pop(0)
         else:
-            line = tstamp + " " + secureString + user + ": " + lines.pop(0)
+        """
+        line = tstamp + " " + secureString + user + ": " + lines.pop(0)
 
         buf.append(line)
         #TODO: remove these lines
@@ -1541,6 +1544,7 @@ class VimChatScope:
 
         try:
             VimChat.appendMessage(account, buf, message, fromJid, secure)
+            vim.command('normal G')
         except:
             print 'Error zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
             print 'could not appendMessage:', message, 'from:', fromJid
