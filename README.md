@@ -69,7 +69,7 @@ Type `B` to toggle this list.
 Hit enter on someone's name to open a chat buffer.
 
 In a chat buffer, type `i` (or `a` or `o`) to open a send buffer.
-Type a message and hit enter. 
+Type a message and hit enter.
 
 # Buddy List
 
@@ -83,7 +83,7 @@ The buddy list is comprised of folds, and unfolding any buddy will show items li
 
 Once in the buddy list, you can scroll through your buddies and hit enter when your cursor is on the buddy you want to chat with.
 
-Pressing `<leader>l` while on a buddy entry in the buddy list will bring up the log files (if any) for that user. 
+Pressing `<leader>l` while on a buddy entry in the buddy list will bring up the log files (if any) for that user.
 
 # Chat Buffers
 
@@ -93,7 +93,7 @@ In the send buffer you simply type your message and hit enter.
 To send multiple lines, select the lines in visual mode and then hit enter.
 
 Typing `<leader>l` will bring up a new tab containing log files for the current
-user. 
+user.
 
 # Chat Rooms
 
@@ -107,7 +107,7 @@ First install the growl notification system: http://growl.info/
 
 Then download the growl SDK from: http://growl.info/downloads_developers.php
 
-Finally navigate into the Bindings/python folder and run: 
+Finally navigate into the Bindings/python folder and run:
     sudo python setup.py install
 
 # Optional Settings
@@ -119,17 +119,17 @@ You can can update your `~/.vimrc` with these settings to customize vimchat. All
 * let g:vimchat\_logchats = (0 or 1) default is 1 -- 0 will not log,
 * let g:vimchat\_otr = (0 or 1) default is 0 -- enable otr or not
 * let g:vimchat\_logotr = (0 or 1) default is 1 -- log otr convos or not
-* let g:vimchat\_statusicon = (0 or 1) default is 1 -- use a gtk status icon? 
+* let g:vimchat\_statusicon = (0 or 1) default is 1 -- use a gtk status icon?
 * let g:vimchat\_blinktimeout = timeout in seconds, default is -1
 * let g:vimchat\_buddylistmaxwidth = max width of buddy list window, default ''
-* let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]" 
+* let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]"
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
 
 # Contributing
 
 Pull requests are welcome. Please follow the pep 8 style guidelines for the python code.
 
-# Contributors 
+# Contributors
 
 * Philipp [philsmd](https://github.com/philsmd)
 * Michael Dillon [michaelcdillon](https://github.com/michaelcdillon)
