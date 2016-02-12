@@ -30,6 +30,7 @@
 "   g:vimchat_timestampformat = format of the msg timestamp default "[%H:%M]"
 "   g:vimchat_showPresenceNotification =
 "       notify if buddy changed status default ""
+"   g:vimchat_show_status_update = (0 or 1) default is 0
 
 python <<EOF
 try:
@@ -550,8 +551,12 @@ class VimChatScope:
                                                "<b>" + onlineUser +
                                                "</b>\nis now " + str(show),
                                                'dialog-information')
-                VimChat.presenceUpdate(self._jids, accountName, chat, show,
-                                       status, priority)
+
+                show_status_update = \
+                    int(vim.eval('g:vimchat_show_status_update'))
+                if show_status_update > 0:
+                    VimChat.presenceUpdate(self._jids, accountName, chat,
+                                           show, status, priority)
             except:
                 pass
 
@@ -1753,6 +1758,9 @@ fu! VimChatCheckVars()
     endif
     if !exists('g:vimchat_showPresenceNotification')
         let g:vimchat_showPresenceNotification=""
+    endif
+    if !exists('g:vimchat_show_status_update')
+        let g:vimchat_show_status_update=0
     endif
 
     return 1
