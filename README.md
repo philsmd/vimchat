@@ -105,7 +105,7 @@ This will display a list of rooms which you can choose from.
 
 First install the growl notification system: http://growl.info/
 
-Then download the growl SDK from: http://growl.info/downloads_developers.php
+Then download the growl SDK from: http://growl.info/downloads\_developers.php
 
 Finally navigate into the Bindings/python folder and run:
     sudo python setup.py install
@@ -125,6 +125,7 @@ You can can update your `~/.vimrc` with these settings to customize vimchat. All
 * let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]"
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
 * let g:vimchat\_show\_status\_update = (0 or 1) default is 0 -- show message if buddy changed status or not
+* let g:vimchat\_log\_file\_format = format of the log file, default "%(u)s\_%(d)s". %(u)s is a placeholder for buddy jid and %(d)s is for current date
 
 # Contributing
 

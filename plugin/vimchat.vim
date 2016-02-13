@@ -31,6 +31,7 @@
 "   g:vimchat_showPresenceNotification =
 "       notify if buddy changed status default ""
 "   g:vimchat_show_status_update = (0 or 1) default is 0
+"   g:vimchat_log_file_format = format of the log file, default "%(u)s_%(d)s"
 
 python <<EOF
 try:
@@ -1417,7 +1418,9 @@ class VimChatScope:
                 os.makedirs(logDir)
 
             day = time.strftime('%Y-%m-%d')
-            log = open(logDir + '/' + user + '-' + day, 'a')
+            log_file_format = vim.eval('g:vimchat_log_file_format')
+            fname = (log_file_format % {'u':user, 'd':day})
+            log = open(logDir + '/' + fname, 'a')
             log.write(msg + '\n')
             log.close()
 
@@ -1761,6 +1764,9 @@ fu! VimChatCheckVars()
     endif
     if !exists('g:vimchat_show_status_update')
         let g:vimchat_show_status_update=0
+    endif
+    if !exists('g:vimchat_log_file_format')
+        let g:vimchat_log_file_format="%(u)s_%(d)s"
     endif
 
     return 1
