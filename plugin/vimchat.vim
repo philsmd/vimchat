@@ -31,6 +31,7 @@
 "   g:vimchat_showPresenceNotification =
 "       notify if buddy changed status default ""
 "   g:vimchat_show_status_update = (0 or 1) default is 0
+"   g:vimchat_show_jid_resource = (0 or 1) default is 1
 "   g:vimchat_log_file_format = format of the log file, default "%(u)s_%(d)s"
 
 python <<EOF
@@ -1232,13 +1233,13 @@ class VimChatScope:
             secureString = "(*" + secure + "*)"
 
         # Get the first line
-        """
-        if resource:
+
+        show_jid_res = int(vim.eval('g:vimchat_show_jid_resource'))
+        if resource and show_jid_res > 0:
             line = tstamp + " " + secureString + \
                 user + "/" + resource + ": " + lines.pop(0)
         else:
-        """
-        line = tstamp + " " + secureString + user + ": " + lines.pop(0)
+            line = tstamp + " " + secureString + user + ": " + lines.pop(0)
 
         buf.append(line)
         # TODO: remove these lines
@@ -1764,6 +1765,9 @@ fu! VimChatCheckVars()
     endif
     if !exists('g:vimchat_show_status_update')
         let g:vimchat_show_status_update=0
+    endif
+    if !exists('g:vimchat_show_jid_resource')
+        let g:vimchat_show_jid_resource=1
     endif
     if !exists('g:vimchat_log_file_format')
         let g:vimchat_log_file_format="%(u)s_%(d)s"

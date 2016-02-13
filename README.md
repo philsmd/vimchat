@@ -125,6 +125,7 @@ You can can update your `~/.vimrc` with these settings to customize vimchat. All
 * let g:vimchat\_timestampformat = format of the message timestamp, default "[%H:%M]"
 * let g:vimchat\_showPresenceNotification = notification if buddy changed status, comma-separated list of states, default ""
 * let g:vimchat\_show\_status\_update = (0 or 1) default is 0 -- show message if buddy changed status or not
+* let g:vimchat\_show\_jid\_resource = (0 or 1) default is 1 -- show resource after buddy jid in a chat messages
 * let g:vimchat\_log\_file\_format = format of the log file, default "%(u)s\_%(d)s". %(u)s is a placeholder for buddy jid and %(d)s is for current date
 
 # Contributing
