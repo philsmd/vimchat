@@ -61,16 +61,14 @@ except Exception as e:
     print "error loading vimchat modules:", e
     vim.command('let g:vimchat_loaded = 1')
 
+is_gui_running = int(vim.eval("has('gui_running')"))
 pynotify_enabled = False
-try:
-    if 'DBUS_SESSION_BUS_ADDRESS' in os.environ \
-            and int(vim.eval("has('gui_running')")) == 0:
+if 'DBUS_SESSION_BUS_ADDRESS' in os.environ and is_gui_running == 0:
+    try:
         import pynotify
         pynotify_enabled = True
-    else:
-        pynotify_enabled = False
-except:
-    pynotify_enabled = False
+    except:
+        pass
 
 pyotr_enabled = False
 pyotr_logging = False
@@ -79,17 +77,16 @@ try:
     pyotr_logging = True
     pyotr_enabled = True
 except:
-    pyotr_enabled = False
-    pyotr_logging = False
+    pass
 
 gtk_enabled = False
-if 'DISPLAY' in os.environ and int(vim.eval("has('gui_running')")) == 0:
+if 'DISPLAY' in os.environ and is_gui_running == 0:
     try:
         from gtk import StatusIcon
         import gtk
         gtk_enabled = True
     except:
-        gtk_enabled = False
+        pass
 
 growl_enabled = False
 try:
@@ -97,7 +94,7 @@ try:
     from Growl import Image, GrowlNotifier
     growl_enabled = True
 except:
-    growl_enabled = False
+    pass
 
 
 class VimChatScope:
