@@ -1572,7 +1572,7 @@ class VimChatScope:
 
         try:
             VimChat.appendMessage(account, buf, message, fromJid, secure)
-            vim.command('normal G')
+            VimChat.moveCursorToBufBottom(buf)
         except:
             print 'Error zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz'
             print 'could not appendMessage:', message, 'from:', fromJid
