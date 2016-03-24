@@ -1,7 +1,7 @@
 #!/bin/bash
 echo "Installing vimchat ..."
 
-mkdir -p ~/.vim/plugin 
+mkdir -p ~/.vim/plugin
 if [ $? != 0 ]; then echo "Could not create ~/.vim/plugin"; exit 1; fi
 cp plugin/vimchat.vim ~/.vim/plugin
 

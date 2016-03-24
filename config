@@ -18,7 +18,7 @@
 
 # Here you may list groupchat and irc rooms.
 # The format is [chatroom:alias] where alias is what you will use to refer to it
-# when you want to join a room. To join a room, type \j in vimchat.
+# when you want to join a room. To join a room, type <leader>j in vimchat.
 
 #[chatroom:work]
 #account = bob@jabber1.acme.com
